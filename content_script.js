@@ -799,20 +799,6 @@ chatHtml2 = `
     var typingTimer = null;
     // set up the chat state, or reset the state if the system has already been set up
 
-var setChatVisible = function(visible) {
-      if (visible) {
-        jQuery('.sizing-wrapper').addClass('with-chat');
-        jQuery('.sizing-wrapper').css('right', chatSidebarWidth + 'px');
-        jQuery('#chat-wrapper').show();
-        if (!document.hasFocus()) {
-          clearUnreadCount();
-        }
-      } else {
-        jQuery('#chat-wrapper').hide();
-        jQuery('.sizing-wrapper').removeClass('with-chat');
-        jQuery('.sizing-wrapper').css('right', '0px');
-      }
-    };
 
     var initChat = function() {
       if (jQuery('#chat-wrapper').length === 0) {
@@ -956,3 +942,23 @@ var allowFullScreen = function() {
         } */
 
   chrome.runtime.onMessage.addListener(popupInteraction)
+
+  //////////////////////////////////////////////////////////////////////////
+  // Event Listeners                                                      //
+  //////////////////////////////////////////////////////////////////////////
+
+  function createEventListeners() {
+    document.querySelectorAll("rect[role='cell']").forEach(cell => {
+      cell.addEventListener('keydown', function(event) {
+          if (event.keyCode >= 48 && event.keyCode <= 90) { // if alphanumeric key pressed
+            console.log('alphanumeric pressed ' + event.keyCode + " at " + cell.id + " by " + userId);
+            socket.emit('keyInput', {keyCode: event.keyCode, cellId: cell.id, userId: userId}); 
+          } else if (event.keyCode == 8 || event.keyCode == 46) { // if backspace or delete pressed
+            console.log('backspace pressed at ' + cell.id );
+            socket.emit('backspace', {cellId: cell.id, userId: userId}); 
+          }
+      });
+    });
+    console.log("event listeners created");
+  }
+  createEventListeners();

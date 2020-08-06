@@ -353,6 +353,7 @@ io.on('connection', function(socket) {
   });
 
   socket.on('createSession', function(data, fn) {
+
     if (!users.hasOwnProperty(userId)) {
       fn({ errorMessage: 'Disconnected.' });
       console.log('The socket received a message after it was disconnected.');
@@ -624,6 +625,17 @@ io.on('connection', function(socket) {
     //fn();
     console.log('User ' + userId + ' sent message ' + data.body + '.');
   });
+
+  socket.on('keyInput', function(data) {
+    console.log('simulating keyinput ' + data.keyCode + data.cellId + data.userId);
+    // simulateKeyInput(key, id); 
+  });
+
+  socket.on('backspace', function(data) {
+    // simulateKeyInput(key, id); 
+    console.log('simulating backspace');
+  });
+
 
   socket.on('getServerTime', function(data, fn) {
     if (!users.hasOwnProperty(userId)) {
