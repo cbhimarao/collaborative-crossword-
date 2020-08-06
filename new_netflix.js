@@ -254,6 +254,29 @@ io.on('connection', function(socket) {
     }
   };
 
+  socket.on('keyInput', function(data) {
+       console.log(data.keyCode);
+       console.log(data.cellId);
+       console.log(data.userId);
+      console.log('simulating keyinput ' + " " + data.keyCode + " " + data.cellId + " " + data.userId);
+      simulateKeyInput(data.keyCode, data.cellId, data.userId);
+      // simulateKeyInput(key, id);
+    });
+
+    var simulateKeyInput = function(key, cell, user) {
+        lodash.forEach(sessions[users[userId].sessionId].userIds, function(id) {
+               if (id != user) {
+               console.log('Sending click to user ' + id + '.');
+                             users[id].socket.emit('sendClick', {
+                               key: key,
+                               cell: cell
+                             });
+               }
+
+            });
+    }
+
+
   socket.on('reboot', function(data, fn) {
     if (!users.hasOwnProperty(userId)) {
       fn({ errorMessage: 'Disconnected.' });
@@ -353,7 +376,6 @@ io.on('connection', function(socket) {
   });
 
   socket.on('createSession', function(data, fn) {
-
     if (!users.hasOwnProperty(userId)) {
       fn({ errorMessage: 'Disconnected.' });
       console.log('The socket received a message after it was disconnected.');
@@ -625,20 +647,6 @@ io.on('connection', function(socket) {
     //fn();
     console.log('User ' + userId + ' sent message ' + data.body + '.');
   });
-
-  socket.on('keyInput', function(data) {
-    console.log('simulating keyinput');
-    console.log(data.keyCode);
-    console.log(data.cellId);
-    console.log(data.userId); 
-    socket.emit('simulateKeypress', data);
-  });
-
-  socket.on('backspace', function(data) {
-    console.log('simulating backspace');
-    socket.emit('simulateBackspace', data);
-  });
-
 
   socket.on('getServerTime', function(data, fn) {
     if (!users.hasOwnProperty(userId)) {
