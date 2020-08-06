@@ -962,3 +962,25 @@ var allowFullScreen = function() {
     console.log("event listeners created");
   }
   createEventListeners();
+
+  socket.on('simulateKeypress', function(data) {
+    console.log('received keypress');
+    function simulateKeyInput(keyCode, cellId) {
+      var input = String.fromCharCode(keyCode);
+      console.log(input + " at " + cellId);
+      var targetText = document.querySelector(`rect[id='${cellId}'] ~ text:last-of-type`);
+      targetText.innerHTML = input;
+      targetText.style.fill = 'rgba(0, 0, 0, 0.4)';
+    }
+    simulateKeyInput(data.keyCode, data.cellId);
+  });
+
+  socket.on('simulateBackspace', function(data) {
+    console.log('received backspace');
+    function simulateBackspace(cellId) {
+      console.log("deletion at " + cellId);
+      var targetText = document.querySelector(`rect[id='${cellId}'] ~ text:last-of-type`);
+      targetText.innerHTML = '';
+  }
+    simulateBackspace(data.cellId);
+  });

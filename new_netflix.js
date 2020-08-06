@@ -627,13 +627,16 @@ io.on('connection', function(socket) {
   });
 
   socket.on('keyInput', function(data) {
-    console.log('simulating keyinput ' + data.keyCode + data.cellId + data.userId);
-    // simulateKeyInput(key, id); 
+    console.log('simulating keyinput');
+    console.log(data.keyCode);
+    console.log(data.cellId);
+    console.log(data.userId); 
+    socket.emit('simulateKeypress', data);
   });
 
   socket.on('backspace', function(data) {
-    // simulateKeyInput(key, id); 
     console.log('simulating backspace');
+    socket.emit('simulateBackspace', data);
   });
 
 
