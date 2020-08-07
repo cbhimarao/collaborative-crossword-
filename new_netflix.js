@@ -254,27 +254,40 @@ io.on('connection', function(socket) {
     }
   };
 
-  socket.on('keyInput', function(data) {
-       console.log(data.keyCode);
-       console.log(data.cellId);
-       console.log(data.userId);
-      console.log('simulating keyinput ' + " " + data.keyCode + " " + data.cellId + " " + data.userId);
-      simulateKeyInput(data.keyCode, data.cellId, data.userId);
-      // simulateKeyInput(key, id);
-    });
+socket.on('keyInput', function(data) {
+    console.log(data.keyCode);
+    console.log(data.cellId);
+    console.log(data.userId);
+    console.log("Received key input " + data.keyCode + " at " + data.cellId + " by " + data.userId);
+    simulateKeyInput(data.keyCode, data.cellId, data.userId);
+  });
 
-    var simulateKeyInput = function(key, cell, user) {
-        lodash.forEach(sessions[users[userId].sessionId].userIds, function(id) {
-               if (id != user) {
-               console.log('Sending click to user ' + id + '.');
-                             users[id].socket.emit('sendClick', {
-                               key: key,
-                               cell: cell
-                             });
-               }
-
+var simulateKeyInput = function(key, cell, user) {
+    lodash.forEach(sessions[users[userId].sessionId].userIds, function(id) {
+        if (id != user) { // simulate key input on each client except sender
+            console.log('Sending key input to user ' + id + '.');
+            users[id].socket.emit('sendInput', {
+              key: key,
+              cell: cell
             });
-    }
+        }
+
+    });
+}
+
+socket.on('backspace', function(data) {
+  console.log("Received backspace at " + data.cellId + " by " + data.userId);
+  simulateBackspace(data.cellId, data.userId);
+});
+
+var simulateBackspace = function(cell, user) {
+  lodash.forEach(sessions[users[userId].sessionId].userIds, function(id) {
+      if (id != user) { // simulate key input on each client except sender
+          console.log('Sending backspace to user ' + id + '.');
+          users[id].socket.emit('sendBackspace', { cell: cell });
+      }
+  });
+}
 
 
   socket.on('reboot', function(data, fn) {

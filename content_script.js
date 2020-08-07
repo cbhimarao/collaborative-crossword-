@@ -13,49 +13,65 @@
 socket = io("http://localhost:3000/", {transports: ['websocket']});
 console.log("socket");
 
- //////////////////////////////////////////////////////////////////////////
-  // Event Listeners                                                      //
-  //////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+// Event Listeners                                                      //
+//////////////////////////////////////////////////////////////////////////
 
-  function createEventListeners() {
-    document.querySelectorAll("rect[role='cell']").forEach(cell => {
-      cell.addEventListener('keydown', function(event) {
-          if (event.keyCode >= 48 && event.keyCode <= 90) { // if alphanumeric key pressed
-            console.log('alphanumeric pressed ' + event.keyCode + " at " + cell.id + " by " + userId);
-            socket.emit('keyInput', {keyCode: event.keyCode, cellId: cell.id, userId: userId});
-          } else if (event.keyCode == 8 || event.keyCode == 46) { // if backspace or delete pressed
-            console.log('backspace pressed at ' + cell.id );
-            socket.emit('backspace', {cellId: cell.id, userId: userId});
+function createEventListeners() {
+  document.querySelectorAll("rect[role='cell']").forEach(cell => {
+    cell.addEventListener('keydown', function(event) {
+        if (event.keyCode >= 48 && event.keyCode <= 90) { // if alphanumeric key pressed
+          console.log('alphanumeric pressed ' + event.keyCode + " at " + cell.id + " by " + userId);
+          var targetText = document.querySelector(`rect[id='${cell.id}'] ~ text:last-of-type`);
+          if (targetText.style.fill === 'rgba(0, 0, 0, 0.4)') { // if typing over gray text, make it appear in black
+            var input = String.fromCharCode(event.keyCode);
+            targetText.innerHTML = input;
+            targetText.style.fill = '#000000';
           }
-      });
+          if (targetText.style.fill === '#000000') { // if typing over black text, make it appear 
+            var input = String.fromCharCode(event.keyCode);
+            targetText.innerHTML = input;
+          }
+          socket.emit('keyInput', {keyCode: event.keyCode, cellId: cell.id, userId: userId});
+        } else if (event.keyCode == 8 || event.keyCode == 46) { // if backspace or delete pressed
+          console.log('backspace pressed at ' + cell.id );
+          socket.emit('backspace', {cellId: cell.id, userId: userId});
+        }
     });
-    console.log("event listeners created");
-  }
+  });
+  console.log("event listeners created");
+}
 
-  createEventListeners();
+createEventListeners();
 
 
 var userId = null;
 socket.on('userId', function(data) {
-      console.log('userId: ' + JSON.stringify(data));
-      if (userId === null) {
-        userId = data;
-      }
-    });
+    console.log('userId: ' + JSON.stringify(data));
+    if (userId === null) {
+      userId = data;
+    }
+});
 
-     socket.on('sendClick', function(data) {
-                   keyCode = data.key;
-                   cellId = data.cell;
-                   console.log(keyCode);
-                   console.log(cellId);
-                   var input = String.fromCharCode(keyCode);
-                    console.log(input + " at " + cellId);
-                       var targetText = document.querySelector(`rect[id='${cellId}'] ~ text:last-of-type`);
-                       console.log(targetText);
-                       targetText.innerHTML = input;
-                       targetText.style.fill = 'rgba(0, 0, 0, 0.4)';
+socket.on("sendInput", function (data) {
+    keyCode = data.key;
+    cellId = data.cell;
+    var input = String.fromCharCode(keyCode);
+    console.log(input + " at " + cellId);
+    var targetText = document.querySelector(
+      `rect[id='${cellId}'] ~ text:last-of-type`
+    );
+    console.log(targetText);
+    targetText.innerHTML = input;
+    targetText.style.fill = "rgba(0, 0, 0, 0.4)";
+});
 
-                  });
+socket.on("sendBackspace", function (data) {
+  cellId = data.cell;
+  console.log("deletion at " + cellId);
+  var targetText = document.querySelector(`rect[id='${cellId}'] ~ text:last-of-type`);
+  targetText.innerHTML = '';
+});
 
 // chat state
     var messages = [];
